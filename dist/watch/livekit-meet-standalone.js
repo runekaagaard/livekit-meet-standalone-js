@@ -2959,9 +2959,11 @@ const LivekitMeet = ({ token, wsUrl })=>{
         serverUrl: wsUrl,
         connect: true,
         "data-lk-theme": "default",
+        audio: true,
+        video: true,
         children: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _componentsReact.VideoConference), {}, void 0, false, {
             fileName: "livekit-meet-standalone.jsx",
-            lineNumber: 9,
+            lineNumber: 11,
             columnNumber: 7
         }, undefined)
     }, void 0, false, {
@@ -2985,7 +2987,7 @@ const livekitStandalone = {
             wsUrl: wsUrl
         }, void 0, false, {
             fileName: "livekit-meet-standalone.jsx",
-            lineNumber: 24,
+            lineNumber: 30,
             columnNumber: 17
         }, undefined));
     }

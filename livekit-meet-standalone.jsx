@@ -1,14 +1,20 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import { LiveKitRoom, VideoConference } from '@livekit/components-react';
+import { LiveKitRoom, VideoConference, PreJoin } from '@livekit/components-react';
 import '@livekit/components-styles';
 
 const LivekitMeet = ({ token, wsUrl }) => {
   return (
-    <LiveKitRoom token={token} serverUrl={wsUrl} connect={true} data-lk-theme="default">
+    <LiveKitRoom token={token} serverUrl={wsUrl} connect={true} data-lk-theme="default" audio={true} video={true}
+                  
+    >
       <VideoConference />
     </LiveKitRoom>
   );
+  return <PreJoin joinLabel="Begynd samtale med Snip Snap" micLabel="Mikrofon" camLabel="Kamera"
+                   defaults={{username: "Ping Pong"}} persistUserChoices={false} data-lk-theme="default"
+          />
+  
 };
 
 // Export the global function that will be called from HTML
