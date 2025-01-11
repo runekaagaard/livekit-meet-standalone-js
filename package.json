@@ -1,0 +1,33 @@
+{
+  "name": "livekit-meet-standalone",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "A standalone javascript implementation of the livekit meeting room. Just include a js script and off we go :)",
+  "main": "livekit-meet-standalone.js",
+  "targets": {
+    "main": {
+      "context": "browser",
+      "outputFormat": "global",
+      "includeNodeModules": true
+    }
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "A standalone javascript implementation of the livekit meeting room. Just include a js script and off we go :)"
+  },
+  "keywords": [
+    "livekit",
+    "meet",
+    "js"
+  ],
+  "author": "Rune Kaagaard",
+  "license": "MPL-2.0",
+  "dependencies": {
+    "@livekit/components-react": "^2.6.11",
+    "parcel": "^2.13.3",
+    "serve": "^14.2.4"
+  }
+}
