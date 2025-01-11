@@ -3,10 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LiveKit Meet</title>
-    <script src="livekit-meet-standalone.js"></script>
+    <title>LiveKit Meet (Build)</title>
 </head>
 <body>
-    <div id="livekit-meet"></div>
+    <div id="custom-element"></div>
+    <script src="./dist/livekit-meet-standalone.min.js"></script>
+    <script>
+        window.onload = () => {
+            livekitStandalone.room({
+                token: process.env.LIVEKIT_TOKEN || 'your-token-here',
+                wsUrl: process.env.LIVEKIT_WS_URL || 'your-ws-url-here',
+                elementId: 'custom-element'
+            });
+        };
+    </script>
 </body>
 </html>

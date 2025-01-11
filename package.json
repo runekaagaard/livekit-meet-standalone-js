@@ -3,16 +3,28 @@
   "version": "1.0.0",
   "type": "module",
   "description": "A standalone javascript implementation of the livekit meeting room. Just include a js script and off we go :)",
-  "main": "livekit-meet-standalone.js",
+  "source": "livekit-meet-standalone.jsx",
+  "main": "dist/livekit-meet-standalone.min.js",
   "targets": {
-    "main": {
-      "context": "browser",
+    "development": {
+      "source": "livekit-meet-standalone.jsx",
+      "distDir": "dist",
       "outputFormat": "global",
-      "includeNodeModules": true
+      "optimize": false,
+      "sourceMap": true
+    },
+    "production": {
+      "source": "livekit-meet-standalone.jsx",
+      "distDir": "dist",
+      "outputFormat": "global",
+      "optimize": true,
+      "sourceMap": false
     }
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "watch": "parcel watch --target development",
+    "build": "parcel build --target production --no-source-maps --no-cache && mv dist/livekit-meet-standalone.js dist/livekit-meet-standalone.min.js",
+    "serve": "parcel serve test-dev.html test-build.html --port 3000"
   },
   "repository": {
     "type": "git",
@@ -27,7 +39,13 @@
   "license": "MPL-2.0",
   "dependencies": {
     "@livekit/components-react": "^2.6.11",
-    "parcel": "^2.13.3",
+    "@livekit/components-styles": "^1.1.4",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "serve": "^14.2.4"
+  },
+  "devDependencies": {
+    "parcel": "^2.13.3",
+    "process": "^0.11.10"
   }
 }

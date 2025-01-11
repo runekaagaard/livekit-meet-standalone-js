@@ -3,10 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LiveKit Meet</title>
-    <script src="livekit-meet-standalone.js"></script>
+    <title>LiveKit Meet (Dev)</title>
+    <script type="module" src="credentials.js"></script>
+    <script type="module" src="dist/livekit-meet-standalone.js"></script>
+    <style>
+      body, #video { width: 100%; }
+    </style>
 </head>
 <body>
-    <div id="livekit-meet"></div>
+    <div id="video"></div>
+
+    <script>
+        window.onload = () => {
+            livekitStandalone.room({
+                token: window.LIVEKIT_TOKEN,
+                wsUrl: window.LIVEKIT_WS_URL,
+                elementId: 'video'
+            });
+        };
+    </script>
 </body>
 </html>

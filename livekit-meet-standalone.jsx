@@ -1,14 +1,30 @@
+import React from 'react';
+import { createRoot } from 'react-dom/client';
 import { LiveKitRoom, VideoConference } from '@livekit/components-react';
 
-const TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NzI0OTYzNzUsImlzcyI6IkFQSVJaS0F0VzNnb0RNZyIsIm5hbWUiOiJUZXN0IFVzZXIiLCJuYmYiOjE3MzY0OTYzNzUsInN1YiI6InRlc3QtdXNlciIsInZpZGVvIjp7InJvb20iOiJteS1maXJzdC1yb29tIiwicm9vbUpvaW4iOnRydWV9fQ.uWQCGhCmpkFe6vfmSvjjGZ09KM2FirfTsR0MK4IidZg';
-const WS_URL = 'wss://livekit.prescriba.com';
-
-livekitMeet = {}
-
-livekitMeet.room = function () {
+const LivekitMeet = ({ token, wsUrl }) => {
   return (
-    <LiveKitRoom token={TOKEN} serverUrl={WS_URL} connect={true}>
+    <LiveKitRoom token={token} serverUrl={wsUrl} connect={true} data-lk-theme="default">
       <VideoConference />
     </LiveKitRoom>
-  )
-}
+  );
+};
+
+// Export the global function that will be called from HTML
+const livekitStandalone = {
+  room: ({ token, wsUrl, elementId = 'livekit-meet' }) => {
+    const container = document.getElementById(elementId);
+    if (!container) {
+      console.error(`No div with id "${elementId}" found`);
+      return;
+    }
+    
+    const root = createRoot(container);
+    root.render(<LivekitMeet token={token} wsUrl={wsUrl} />);
+  }
+};
+
+// Expose to window for global access
+window.livekitStandalone = livekitStandalone;
+
+export default livekitStandalone;
