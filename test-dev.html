@@ -6,21 +6,22 @@
     <title>LiveKit Meet (Dev)</title>
     <script type="module" src="credentials.js"></script>
     <script type="module" src="dist/livekit-meet-standalone.js"></script>
+     <link rel="stylesheet" href="dist/livekit-meet-standalone.css" />
     <style>
       body, #video { width: 100%; }
     </style>
+    <script>
+      function room() {
+        livekitStandalone.room({
+            token: window.LIVEKIT_TOKEN,
+            wsUrl: window.LIVEKIT_WS_URL,
+            elementId: 'video'
+        })
+      }
+    </script>
 </head>
 <body>
     <div id="video"></div>
-
-    <script>
-        window.onload = () => {
-            livekitStandalone.room({
-                token: window.LIVEKIT_TOKEN,
-                wsUrl: window.LIVEKIT_WS_URL,
-                elementId: 'video'
-            });
-        };
-    </script>
+    <button onclick="room()">Start</button>
 </body>
 </html>

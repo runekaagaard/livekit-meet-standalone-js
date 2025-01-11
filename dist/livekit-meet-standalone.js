@@ -2952,6 +2952,7 @@ var _react = require("react");
 var _reactDefault = parcelHelpers.interopDefault(_react);
 var _client = require("react-dom/client");
 var _componentsReact = require("@livekit/components-react");
+var _componentsStyles = require("@livekit/components-styles");
 const LivekitMeet = ({ token, wsUrl })=>{
     return /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _componentsReact.LiveKitRoom), {
         token: token,
@@ -2960,12 +2961,12 @@ const LivekitMeet = ({ token, wsUrl })=>{
         "data-lk-theme": "default",
         children: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _componentsReact.VideoConference), {}, void 0, false, {
             fileName: "livekit-meet-standalone.jsx",
-            lineNumber: 8,
+            lineNumber: 9,
             columnNumber: 7
         }, undefined)
     }, void 0, false, {
         fileName: "livekit-meet-standalone.jsx",
-        lineNumber: 7,
+        lineNumber: 8,
         columnNumber: 5
     }, undefined);
 };
@@ -2984,7 +2985,7 @@ const livekitStandalone = {
             wsUrl: wsUrl
         }, void 0, false, {
             fileName: "livekit-meet-standalone.jsx",
-            lineNumber: 23,
+            lineNumber: 24,
             columnNumber: 17
         }, undefined));
     }
@@ -3000,7 +3001,7 @@ $RefreshReg$(_c, "LivekitMeet");
   window.$RefreshReg$ = prevRefreshReg;
   window.$RefreshSig$ = prevRefreshSig;
 }
-},{"react/jsx-dev-runtime":"iTorj","react":"21dqq","react-dom/client":"lOjBx","@livekit/components-react":"7DoN9","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"km3Ru"}],"iTorj":[function(require,module,exports,__globalThis) {
+},{"react/jsx-dev-runtime":"iTorj","react":"21dqq","react-dom/client":"lOjBx","@livekit/components-react":"7DoN9","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"km3Ru","@livekit/components-styles":"axiaZ"}],"iTorj":[function(require,module,exports,__globalThis) {
 'use strict';
 module.exports = require("ee51401569654d91");
 
@@ -55815,6 +55816,6 @@ function registerExportsForReactRefresh(module1) {
 },{"7422ead32dcc1e6b":"786KC","630b62916b1ae0e7":"4SQxb"}],"4SQxb":[function(require,module,exports,__globalThis) {
 module.exports = JSON.parse("{\"name\":\"react-refresh\",\"description\":\"React is a JavaScript library for building user interfaces.\",\"keywords\":[\"react\"],\"version\":\"0.14.2\",\"homepage\":\"https://reactjs.org/\",\"bugs\":\"https://github.com/facebook/react/issues\",\"license\":\"MIT\",\"files\":[\"LICENSE\",\"README.md\",\"babel.js\",\"runtime.js\",\"cjs/\",\"umd/\"],\"main\":\"runtime.js\",\"exports\":{\".\":\"./runtime.js\",\"./runtime\":\"./runtime.js\",\"./babel\":\"./babel.js\",\"./package.json\":\"./package.json\"},\"repository\":{\"type\":\"git\",\"url\":\"https://github.com/facebook/react.git\",\"directory\":\"packages/react\"},\"engines\":{\"node\":\">=0.10.0\"},\"devDependencies\":{\"react-16-8\":\"npm:react@16.8.0\",\"react-dom-16-8\":\"npm:react-dom@16.8.0\",\"scheduler-0-13\":\"npm:scheduler@0.13.0\"}}");
 
-},{}]},["aQL8O","hOJ0J","8HJ7T"], "8HJ7T", "parcelRequire94c2")
+},{}],"axiaZ":[function() {},{}]},["aQL8O","hOJ0J","8HJ7T"], "8HJ7T", "parcelRequire94c2")
 
 //# sourceMappingURL=livekit-meet-standalone.js.map
