@@ -4,18 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LiveKit Meet (Build)</title>
+    <script type="module" src="credentials.js"></script>
+    <script type="module" src="dist/prod/test.js"></script>
+    <script type="module" src="dist/prod/livekit-meet-standalone.min.js"></script>
+    <link rel="stylesheet" href="dist/prod/livekit-meet-standalone.css" />
+    <style>
+      body, #video { width: 100%; }
+    </style>
+    <script>
+      async function room() {
+        const token = await window.getToken();
+        livekitStandalone.room({
+            token: token,
+            wsUrl: window.LIVEKIT_WS_URL,
+            elementId: 'video'
+        })
+      }
+    </script>
 </head>
 <body>
-    <div id="custom-element"></div>
-    <script src="./dist/livekit-meet-standalone.min.js"></script>
-    <script>
-        window.onload = () => {
-            livekitStandalone.room({
-                token: process.env.LIVEKIT_TOKEN || 'your-token-here',
-                wsUrl: process.env.LIVEKIT_WS_URL || 'your-ws-url-here',
-                elementId: 'custom-element'
-            });
-        };
-    </script>
+    <div id="video"></div>
+    <button onclick="room()">Start</button>
 </body>
 </html>

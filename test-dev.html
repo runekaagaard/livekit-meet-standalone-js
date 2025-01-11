@@ -5,23 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LiveKit Meet (Dev)</title>
     <script type="module" src="credentials.js"></script>
-    <script type="module" src="dist/livekit-meet-standalone.js"></script>
-     <link rel="stylesheet" href="dist/livekit-meet-standalone.css" />
+    <script type="module" src="dist/dev/dev.js"></script>
+    <script type="module" src="dist/watch/livekit-meet-standalone.js"></script>
+    <link rel="stylesheet" href="dist/watch/livekit-meet-standalone.css" />
     <style>
-      body, #video { width: 100%; }
+      body, #video { width: 100%; margin: 0; padding: 0; }
+      #video { height: 100vh; }
+      
     </style>
     <script>
-      function room() {
+      async function room() {
+        const token = await window.getToken();
         livekitStandalone.room({
-            token: window.LIVEKIT_TOKEN,
+            token: token,
             wsUrl: window.LIVEKIT_WS_URL,
             elementId: 'video'
         })
+        document.getElementById('start').remove()
       }
     </script>
 </head>
 <body>
+    <button id=start onclick="room()">Start</button>
     <div id="video"></div>
-    <button onclick="room()">Start</button>
 </body>
 </html>

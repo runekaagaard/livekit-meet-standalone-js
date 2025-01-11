@@ -4,27 +4,34 @@
   "type": "module",
   "description": "A standalone javascript implementation of the livekit meeting room. Just include a js script and off we go :)",
   "source": "livekit-meet-standalone.jsx",
-  "main": "dist/livekit-meet-standalone.min.js",
   "targets": {
-    "development": {
-      "source": "livekit-meet-standalone.jsx",
-      "distDir": "dist",
+    "watch": {
+      "source": ["livekit-meet-standalone.jsx"],
+      "distDir": "dist/watch",
       "outputFormat": "global",
       "optimize": false,
       "sourceMap": true
     },
-    "production": {
-      "source": "livekit-meet-standalone.jsx",
-      "distDir": "dist",
+    "dev": {
+      "source": ["dev.js"],
+      "distDir": "dist/dev",
+      "outputFormat": "global",
+      "optimize": false,
+      "sourceMap": true
+    },
+    "prod": {
+      "source": ["livekit-meet-standalone.jsx"],
+      "distDir": "dist/prod",
       "outputFormat": "global",
       "optimize": true,
       "sourceMap": false
     }
   },
   "scripts": {
-    "watch": "parcel watch --target development",
-    "build": "parcel build --target production --no-source-maps --no-cache && mv dist/livekit-meet-standalone.js dist/livekit-meet-standalone.min.js",
-    "serve": "parcel serve test-dev.html test-build.html --port 3000"
+    "watch": "parcel watch --target watch",
+    "dev": "parcel build --target dev --no-source-maps --no-cache",
+    "build": "parcel build --target prod --no-source-maps --no-cache",
+    "serve": "serve"
   },
   "repository": {
     "type": "git",
