@@ -6,21 +6,27 @@
   "source": "livekit-meet-standalone.jsx",
   "targets": {
     "watch": {
-      "source": ["livekit-meet-standalone.jsx"],
+      "source": [
+        "livekit-meet-standalone.jsx"
+      ],
       "distDir": "dist/watch",
       "outputFormat": "global",
       "optimize": false,
       "sourceMap": true
     },
     "dev": {
-      "source": ["dev.js"],
+      "source": [
+        "dev.js"
+      ],
       "distDir": "dist/dev",
       "outputFormat": "global",
       "optimize": false,
       "sourceMap": true
     },
     "prod": {
-      "source": ["livekit-meet-standalone.jsx"],
+      "source": [
+        "livekit-meet-standalone.jsx"
+      ],
       "distDir": "dist/prod",
       "outputFormat": "global",
       "optimize": true,
@@ -47,6 +53,7 @@
   "dependencies": {
     "@livekit/components-react": "^2.6.11",
     "@livekit/components-styles": "^1.1.4",
+    "alertifyjs": "^1.14.0",
     "livekit-server-sdk": "^2.9.7",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

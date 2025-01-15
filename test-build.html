@@ -5,25 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LiveKit Meet (Build)</title>
     <script type="module" src="credentials.js"></script>
-    <script type="module" src="dist/prod/test.js"></script>
-    <script type="module" src="dist/prod/livekit-meet-standalone.min.js"></script>
+    <script type="module" src="dist/dev/dev.js"></script>
+    <script type="module" src="dist/prod/livekit-meet-standalone.js"></script>
     <link rel="stylesheet" href="dist/prod/livekit-meet-standalone.css" />
     <style>
-      body, #video { width: 100%; }
+      body { margin: 0; padding: 0; width: 100%; height: 100vh; }
+      #livekitui-ui { width: 100%; height: 100vh; }
+      #prejoin { margin: 20px; }
     </style>
     <script>
-      async function room() {
-        const token = await window.getToken();
-        livekitStandalone.room({
-            token: token,
-            wsUrl: window.LIVEKIT_WS_URL,
-            elementId: 'video'
-        })
+      async function startMeeting() {
+        const token = await window.getToken()
+        window.livekit.preJoin(
+          token,
+          window.LIVEKIT_SERVER_URL,
+          "Test Room",
+          null  // No return URL
+        )
+        document.getElementById('start').remove()
       }
     </script>
 </head>
 <body>
-    <div id="video"></div>
-    <button onclick="room()">Start</button>
+    <button id="start" onclick="startMeeting()">Start Meeting</button>
+    <div id="prejoin" class="hide"></div>
+    <div id="livekitui-ui"></div>
 </body>
 </html>

@@ -9,24 +9,26 @@
     <script type="module" src="dist/watch/livekit-meet-standalone.js"></script>
     <link rel="stylesheet" href="dist/watch/livekit-meet-standalone.css" />
     <style>
-      body, #video { width: 100%; margin: 0; padding: 0; }
-      #video { height: 100vh; }
-      #username { display: none !important; }
+      body { margin: 0; padding: 0; width: 100%; height: 100vh; }
+      #livekitui-ui { width: 100%; height: 100vh; }
+      #prejoin { margin: 20px; }
     </style>
     <script>
-      async function room() {
-        const token = await window.getToken();
-        livekitStandalone.room({
-            token: token,
-            wsUrl: window.LIVEKIT_WS_URL,
-            elementId: 'video'
-        })
+      async function startMeeting() {
+        const token = await window.getToken()
+        window.livekit.preJoin(
+          token,
+          window.LIVEKIT_SERVER_URL,
+          "Test Room",
+          null  // No return URL
+        )
         document.getElementById('start').remove()
       }
     </script>
 </head>
 <body>
-    <button id=start onclick="room()">Start</button>
-    <div id="video"></div>
+    <button id="start" onclick="startMeeting()">Start Meeting</button>
+    <div id="prejoin" class="hide"></div>
+    <div id="livekitui-ui"></div>
 </body>
 </html>
