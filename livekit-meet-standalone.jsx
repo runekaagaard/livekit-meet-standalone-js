@@ -1,45 +1,45 @@
 import React from 'react'
 import { createRoot } from 'react-dom/client'
 import { LiveKitRoom, VideoConference, PreJoin, StartAudio } from '@livekit/components-react'
-import { Room, VideoPresets } from 'livekit-client'
+import { Room, ExternalE2EEKeyProvider } from 'livekit-client'
 import '@livekit/components-styles'
 import 'alertifyjs/build/css/alertify.css'
 import alertify from 'alertifyjs'
 
-// Base room configuration for optimal performance
-const baseRoomOptions = {
-  videoCaptureDefaults: {
-    resolution: VideoPresets.h720
-  },
-  publishDefaults: {
-    videoSimulcastLayers: [VideoPresets.h540, VideoPresets.h216],
-    dtx: false
-  },
-  adaptiveStream: { pixelDensity: 'screen' },
-  dynacast: true
+const getRoom = (options = {}, e2eeKey = null) => {
+  const room = new Room(options)
+  
+  if (e2eeKey) {
+    const keyProvider = new ExternalE2EEKeyProvider()
+    keyProvider.setKey(e2eeKey)
+    
+    room.connect(options.serverUrl, options.token, {
+      e2ee: {
+        keyProvider,
+        worker: new Worker(new URL('livekit-client/e2ee-worker', import.meta.url))
+      }
+    })
+    
+    room.setE2EEEnabled(true)
+  }
+  
+  return room
 }
 
-const LivekitRoomComponent = ({livekitRoomOptions = {}}) => {
-  const room = React.useMemo(() => 
-    new Room({ ...baseRoomOptions, ...livekitRoomOptions }), 
-    [livekitRoomOptions]
-  )
-
-  return (
-    <LiveKitRoom 
-      room={room}
-      connectOptions={{ autoSubscribe: true }}
-      onError={(error) => {
-        console.error('Room error:', error)
-        alertify.error(`Room error: ${error.message}`)
-      }}
-      {...livekitRoomOptions}
-    >
-      <VideoConference />
-      <StartAudio />
-    </LiveKitRoom>
-  )
-}
+const LivekitRoomComponent = ({livekitRoomOptions = {}, e2eeKey = null}) => (
+  <LiveKitRoom 
+    room={getRoom(livekitRoomOptions, e2eeKey)}
+    connectOptions={{ autoSubscribe: true }}
+    onError={(error) => {
+      console.error('Room error:', error)
+      alertify.error(`Room error: ${error.message}`)
+    }}
+    {...livekitRoomOptions}
+  >
+    <VideoConference />
+    <StartAudio />
+  </LiveKitRoom>
+)
 
 const PreJoinComponent = ({preJoinOptions = {}}) => (
   <PreJoin 
@@ -62,7 +62,7 @@ const getRoot = (elementId) => {
 }
 
 // User-facing functions
-function preJoin(token, serverUrl, name, returnUrl) {
+function preJoin(token, serverUrl, name, returnUrl, e2eeKey = null) {
   const prejoinElement = document.getElementById('prejoin')
   if (prejoinElement) prejoinElement.classList.remove('hide')
   
@@ -83,14 +83,14 @@ function preJoin(token, serverUrl, name, returnUrl) {
         serverUrl,
         name,
         onSubmit: (preJoinChoices) => { 
-          room(token, serverUrl, name, preJoinChoices, returnUrl)
+          room(token, serverUrl, name, preJoinChoices, returnUrl, e2eeKey)
         }
       }}
     />
   )
 }
 
-function room(token, serverUrl, name, preJoinChoices, returnUrl) {
+function room(token, serverUrl, name, preJoinChoices, returnUrl, e2eeKey = null) {
   const prejoinElement = document.getElementById('prejoin')
   if (prejoinElement) prejoinElement.classList.add('hide')
   
@@ -114,10 +114,11 @@ function room(token, serverUrl, name, preJoinChoices, returnUrl) {
           if (returnUrl) {
             window.location.href = returnUrl
           } else {
-            preJoin(token, serverUrl, name, returnUrl)
+            preJoin(token, serverUrl, name, returnUrl, e2eeKey)
           }
         }
       }}
+      e2eeKey={e2eeKey}
     />
   )
 }
