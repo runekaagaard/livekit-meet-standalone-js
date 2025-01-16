@@ -6,29 +6,28 @@ import '@livekit/components-styles'
 import 'alertifyjs/build/css/alertify.css'
 import alertify from 'alertifyjs'
 
-const getRoom = (options = {}, e2eeKey = null) => {
-  const room = new Room(options)
+const getRoom = (options = {}, e2eeOptions) => {
+  // validateE2EEOptions(e2eeOptions)
   
-  if (e2eeKey) {
-    const keyProvider = new ExternalE2EEKeyProvider()
-    keyProvider.setKey(e2eeKey)
-    
-    room.connect(options.serverUrl, options.token, {
-      e2ee: {
-        keyProvider,
-        worker: new Worker(new URL('livekit-client/e2ee-worker', import.meta.url))
-      }
-    })
-    
-    room.setE2EEEnabled(true)
-  }
+  const keyProvider = new ExternalE2EEKeyProvider()
+  keyProvider.setKey(e2eeOptions.key)
+  
+  const room = new Room({
+    ...options,
+    e2ee: {
+      keyProvider,
+      worker: new Worker(e2eeOptions.workerUrl)
+    }
+  })
+  
+  room.setE2EEEnabled(true)
   
   return room
 }
 
-const LivekitRoomComponent = ({livekitRoomOptions = {}, e2eeKey = null}) => (
+const LivekitRoomComponent = ({livekitRoomOptions = {}, e2eeOptions = null}) => (
   <LiveKitRoom 
-    room={getRoom(livekitRoomOptions, e2eeKey)}
+    room={getRoom(livekitRoomOptions, e2eeOptions)}
     connectOptions={{ autoSubscribe: true }}
     onError={(error) => {
       console.error('Room error:', error)
@@ -62,7 +61,7 @@ const getRoot = (elementId) => {
 }
 
 // User-facing functions
-function preJoin(token, serverUrl, name, returnUrl, e2eeKey = null) {
+function preJoin(token, serverUrl, name, returnUrl, e2eeOptions = null) {
   const prejoinElement = document.getElementById('prejoin')
   if (prejoinElement) prejoinElement.classList.remove('hide')
   
@@ -83,14 +82,14 @@ function preJoin(token, serverUrl, name, returnUrl, e2eeKey = null) {
         serverUrl,
         name,
         onSubmit: (preJoinChoices) => { 
-          room(token, serverUrl, name, preJoinChoices, returnUrl, e2eeKey)
+          room(token, serverUrl, name, preJoinChoices, returnUrl, e2eeOptions)
         }
       }}
     />
   )
 }
 
-function room(token, serverUrl, name, preJoinChoices, returnUrl, e2eeKey = null) {
+function room(token, serverUrl, name, preJoinChoices, returnUrl, e2eeOptions = null) {
   const prejoinElement = document.getElementById('prejoin')
   if (prejoinElement) prejoinElement.classList.add('hide')
   
@@ -114,11 +113,11 @@ function room(token, serverUrl, name, preJoinChoices, returnUrl, e2eeKey = null)
           if (returnUrl) {
             window.location.href = returnUrl
           } else {
-            preJoin(token, serverUrl, name, returnUrl, e2eeKey)
+            preJoin(token, serverUrl, name, returnUrl, e2eeOptions)
           }
         }
       }}
-      e2eeKey={e2eeKey}
+      e2eeOptions={e2eeOptions}
     />
   )
 }
