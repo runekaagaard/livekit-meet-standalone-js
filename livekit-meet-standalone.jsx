@@ -6,8 +6,20 @@ import '@livekit/components-styles'
 import 'alertifyjs/build/css/alertify.css'
 import alertify from 'alertifyjs'
 
+const validateE2EEOptions = (e2eeOptions) => {
+  if (!e2eeOptions) {
+    throw new Error('E2EE options are required')
+  }
+  if (!e2eeOptions.workerUrl) {
+    throw new Error('E2EE worker URL is required')
+  }
+  if (!e2eeOptions.key) {
+    throw new Error('E2EE key is required')
+  }
+}
+
 const getRoom = (options = {}, e2eeOptions) => {
-  // validateE2EEOptions(e2eeOptions)
+  validateE2EEOptions(e2eeOptions)
   
   const keyProvider = new ExternalE2EEKeyProvider()
   keyProvider.setKey(e2eeOptions.key)
@@ -25,7 +37,7 @@ const getRoom = (options = {}, e2eeOptions) => {
   return room
 }
 
-const LivekitRoomComponent = ({livekitRoomOptions = {}, e2eeOptions = null}) => (
+const LivekitRoomComponent = ({livekitRoomOptions = {}, e2eeOptions}) => (
   <LiveKitRoom 
     room={getRoom(livekitRoomOptions, e2eeOptions)}
     connectOptions={{ autoSubscribe: true }}
@@ -61,7 +73,14 @@ const getRoot = (elementId) => {
 }
 
 // User-facing functions
-function preJoin(token, serverUrl, name, returnUrl, e2eeOptions = null) {
+function preJoin(token, serverUrl, name, returnUrl, e2eeOptions) {
+  try {
+    validateE2EEOptions(e2eeOptions)
+  } catch (error) {
+    alertify.error(error.message)
+    return
+  }
+
   const prejoinElement = document.getElementById('prejoin')
   if (prejoinElement) prejoinElement.classList.remove('hide')
   
@@ -89,7 +108,14 @@ function preJoin(token, serverUrl, name, returnUrl, e2eeOptions = null) {
   )
 }
 
-function room(token, serverUrl, name, preJoinChoices, returnUrl, e2eeOptions = null) {
+function room(token, serverUrl, name, preJoinChoices, returnUrl, e2eeOptions) {
+  try {
+    validateE2EEOptions(e2eeOptions)
+  } catch (error) {
+    alertify.error(error.message)
+    return
+  }
+
   const prejoinElement = document.getElementById('prejoin')
   if (prejoinElement) prejoinElement.classList.add('hide')
   
