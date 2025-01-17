@@ -2956,34 +2956,30 @@ var _componentsStyles = require("@livekit/components-styles");
 var _alertifyCss = require("alertifyjs/build/css/alertify.css");
 var _alertifyjs = require("alertifyjs");
 var _alertifyjsDefault = parcelHelpers.interopDefault(_alertifyjs);
-var _s = $RefreshSig$();
-// Base room configuration for optimal performance
-const baseRoomOptions = {
-    videoCaptureDefaults: {
-        resolution: (0, _livekitClient.VideoPresets).h720
-    },
-    publishDefaults: {
-        videoSimulcastLayers: [
-            (0, _livekitClient.VideoPresets).h540,
-            (0, _livekitClient.VideoPresets).h216
-        ],
-        dtx: false
-    },
-    adaptiveStream: {
-        pixelDensity: 'screen'
-    },
-    dynacast: true
+const validateE2EEOptions = (e2eeOptions)=>{
+    if (!e2eeOptions) throw new Error('E2EE options are required');
+    if (!!e2eeOptions.disabled) return;
+    if (!e2eeOptions.workerUrl) throw new Error('E2EE worker URL is required');
+    if (!e2eeOptions.key) throw new Error('E2EE key is required');
 };
-const LivekitRoomComponent = ({ livekitRoomOptions = {} })=>{
-    _s();
-    const room = (0, _reactDefault.default).useMemo(()=>new (0, _livekitClient.Room)({
-            ...baseRoomOptions,
-            ...livekitRoomOptions
-        }), [
-        livekitRoomOptions
-    ]);
-    return /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _componentsReact.LiveKitRoom), {
-        room: room,
+const getRoom = (options = {}, e2eeOptions)=>{
+    validateE2EEOptions(e2eeOptions);
+    if (e2eeOptions.disabled !== true) {
+        const keyProvider = new (0, _livekitClient.ExternalE2EEKeyProvider)();
+        keyProvider.setKey(e2eeOptions.key);
+        const room = new (0, _livekitClient.Room)({
+            ...options,
+            e2ee: {
+                keyProvider,
+                worker: new Worker(e2eeOptions.workerUrl)
+            }
+        });
+        room.setE2EEEnabled(true);
+        return room;
+    } else return new (0, _livekitClient.Room)(options);
+};
+const LivekitRoomComponent = ({ livekitRoomOptions = {}, e2eeOptions })=>/*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _componentsReact.LiveKitRoom), {
+        room: getRoom(livekitRoomOptions, e2eeOptions),
         connectOptions: {
             autoSubscribe: true
         },
@@ -2995,22 +2991,20 @@ const LivekitRoomComponent = ({ livekitRoomOptions = {} })=>{
         children: [
             /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _componentsReact.VideoConference), {}, void 0, false, {
                 fileName: "livekit-meet-standalone.jsx",
-                lineNumber: 38,
-                columnNumber: 7
+                lineNumber: 56,
+                columnNumber: 5
             }, undefined),
             /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _componentsReact.StartAudio), {}, void 0, false, {
                 fileName: "livekit-meet-standalone.jsx",
-                lineNumber: 39,
-                columnNumber: 7
+                lineNumber: 57,
+                columnNumber: 5
             }, undefined)
         ]
     }, void 0, true, {
         fileName: "livekit-meet-standalone.jsx",
-        lineNumber: 29,
-        columnNumber: 5
+        lineNumber: 47,
+        columnNumber: 3
     }, undefined);
-};
-_s(LivekitRoomComponent, "rukKDJoGV1WxTbjPPiMwP3TE+P4=");
 _c = LivekitRoomComponent;
 const PreJoinComponent = ({ preJoinOptions = {} })=>/*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _componentsReact.PreJoin), {
         onError: (error)=>{
@@ -3020,7 +3014,7 @@ const PreJoinComponent = ({ preJoinOptions = {} })=>/*#__PURE__*/ (0, _jsxDevRun
         ...preJoinOptions
     }, void 0, false, {
         fileName: "livekit-meet-standalone.jsx",
-        lineNumber: 45,
+        lineNumber: 62,
         columnNumber: 3
     }, undefined);
 _c1 = PreJoinComponent;
@@ -3034,7 +3028,13 @@ const getRoot = (elementId)=>{
     return (0, _client.createRoot)(container);
 };
 // User-facing functions
-function preJoin(token, serverUrl, name, returnUrl) {
+function preJoin(token, serverUrl, name, returnUrl, e2eeOptions) {
+    try {
+        validateE2EEOptions(e2eeOptions);
+    } catch (error) {
+        (0, _alertifyjsDefault.default).error(error.message);
+        return;
+    }
     const prejoinElement = document.getElementById('prejoin');
     if (prejoinElement) prejoinElement.classList.remove('hide');
     const root = getRoot('livekitui-ui');
@@ -3052,20 +3052,32 @@ function preJoin(token, serverUrl, name, returnUrl) {
             serverUrl,
             name,
             onSubmit: (preJoinChoices)=>{
-                room(token, serverUrl, name, preJoinChoices, returnUrl);
+                room(token, serverUrl, name, preJoinChoices, returnUrl, e2eeOptions);
             }
         }
     }, void 0, false, {
         fileName: "livekit-meet-standalone.jsx",
-        lineNumber: 73,
+        lineNumber: 97,
         columnNumber: 5
     }, this));
 }
-function room(token, serverUrl, name, preJoinChoices, returnUrl) {
+function room(token, serverUrl, name, preJoinChoices, returnUrl, e2eeOptions) {
+    try {
+        validateE2EEOptions(e2eeOptions);
+    } catch (error) {
+        (0, _alertifyjsDefault.default).error(error.message);
+        return;
+    }
     const prejoinElement = document.getElementById('prejoin');
     if (prejoinElement) prejoinElement.classList.add('hide');
     const root = getRoot('livekitui-ui');
     if (!root) return;
+    document.addEventListener('click', (e)=>{
+        if (e.target.matches('.lk-disconnect-button')) {
+            if (returnUrl) window.location.href = returnUrl;
+            else preJoin(token, serverUrl, name, returnUrl, e2eeOptions);
+        }
+    });
     root.render(/*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)(LivekitRoomComponent, {
         livekitRoomOptions: {
             'data-lk-theme': 'default',
@@ -3076,16 +3088,16 @@ function room(token, serverUrl, name, preJoinChoices, returnUrl) {
             audio: preJoinChoices?.audioEnabled,
             video: preJoinChoices?.videoEnabled,
             onError: (error)=>{
-                (0, _alertifyjsDefault.default).error("Error connecting to room: " + error.message);
+                if (error.message === "Client initiated disconnect") return;
+                console.error(error);
+                (0, _alertifyjsDefault.default).error(error.message);
             },
-            onDisconnected: ()=>{
-                if (returnUrl) window.location.href = returnUrl;
-                else preJoin(token, serverUrl, name, returnUrl);
-            }
-        }
+            onDisconnected: ()=>{}
+        },
+        e2eeOptions: e2eeOptions
     }, void 0, false, {
         fileName: "livekit-meet-standalone.jsx",
-        lineNumber: 101,
+        lineNumber: 142,
         columnNumber: 5
     }, this));
 }

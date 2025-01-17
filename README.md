@@ -17,6 +17,7 @@ A standalone JavaScript implementation of the LiveKit meeting room. Just include
 ```html
 <script src="path/to/livekit-meet-standalone.js"></script>
 <link rel="stylesheet" href="path/to/livekit-meet-standalone.css" />
+<script src="dist/e2ee/livekit-client.e2ee.worker.min.js"></script>
 ```
 
 2. Add the required container elements:
@@ -40,9 +41,19 @@ window.livekit.preJoin(
   "your-token",      // LiveKit token
   "wss://your-url",  // LiveKit server URL
   "Room Name",       // Room name
-  "https://your-return-url.com"  // Optional return URL
+  "https://your-return-url.com",  // Optional return URL
+  {
+    key: "your-secret-key",      // E2EE encryption key
+    workerUrl: "dist/e2ee/livekit-client.e2ee.worker.min.js"
+  }
 );
 ```
+
+### End-to-End Encryption (E2EE)
+
+The E2EE feature requires:
+- A secret key for encryption/decryption
+- The E2EE worker script (included at `dist/e2ee/livekit-client.e2ee.worker.min.js`)
 
 ## Development
 

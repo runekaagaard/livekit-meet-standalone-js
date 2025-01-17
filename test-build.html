@@ -20,7 +20,10 @@
           window.LIVEKIT_WS_URL,
           "Test Room",
           null,  // No return URL
-          "SecretPassword"  // E2EE key
+          {
+            key: "SecretPassword",  // E2EE key
+            workerUrl: "dist/e2ee/livekit-client.e2ee.worker.min.js"
+          }
         )
         document.getElementById('start').remove()
       }

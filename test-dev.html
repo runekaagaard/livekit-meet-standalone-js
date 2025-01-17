@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LiveKit Meet (Dev)</title>
+    <script type="module" src="dist/dev/dev.js"></script>
     <script type="module" src="credentials.js"></script>
     <script type="module" src="dist/watch/livekit-meet-standalone.js"></script>
     <link rel="stylesheet" href="dist/watch/livekit-meet-standalone.css" />
@@ -17,10 +18,13 @@
         const token = await window.getToken()
         window.livekit.preJoin(
           token,
-          window.LIVEKIT_WS_URL,
+          window.LIVEKIT_SERVER_URL,
           "Test Room",
           null,  // No return URL
-          "SecretPassword"  // E2EE key
+          {
+            key: "SecretPassword",  // E2EE key
+            workerUrl: "dist/e2ee/livekit-client.e2ee.worker.min.js"
+          }
         )
         document.getElementById('start').remove()
       }
