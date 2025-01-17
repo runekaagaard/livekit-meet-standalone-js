@@ -10,6 +10,9 @@ const validateE2EEOptions = (e2eeOptions) => {
   if (!e2eeOptions) {
     throw new Error('E2EE options are required')
   }
+  if (!!e2eeOptions.disabled) {
+    return
+  }
   if (!e2eeOptions.workerUrl) {
     throw new Error('E2EE worker URL is required')
   }
@@ -20,21 +23,24 @@ const validateE2EEOptions = (e2eeOptions) => {
 
 const getRoom = (options = {}, e2eeOptions) => {
   validateE2EEOptions(e2eeOptions)
-  
-  const keyProvider = new ExternalE2EEKeyProvider()
-  keyProvider.setKey(e2eeOptions.key)
-  
-  const room = new Room({
-    ...options,
-    e2ee: {
-      keyProvider,
-      worker: new Worker(e2eeOptions.workerUrl)
-    }
-  })
-  
-  room.setE2EEEnabled(true)
-  
-  return room
+
+  if (e2eeOptions.disabled !== true) {
+    const keyProvider = new ExternalE2EEKeyProvider()
+    keyProvider.setKey(e2eeOptions.key)
+
+    const room = new Room({
+      ...options,
+      e2ee: {
+        keyProvider,
+        worker: new Worker(e2eeOptions.workerUrl)
+      }
+    })
+
+    room.setE2EEEnabled(true)
+    return room
+  } else {
+    return new Room(options)
+  }
 }
 
 const LivekitRoomComponent = ({livekitRoomOptions = {}, e2eeOptions}) => (
@@ -122,6 +128,16 @@ function room(token, serverUrl, name, preJoinChoices, returnUrl, e2eeOptions) {
   const root = getRoot('livekitui-ui')
   if (!root) return
   
+  document.addEventListener('click', e => {
+    if (e.target.matches('.lk-disconnect-button')) {
+      if (returnUrl) {
+        window.location.href = returnUrl
+      } else {
+        preJoin(token, serverUrl, name, returnUrl, e2eeOptions)
+      }
+    }
+  })
+  
   root.render(
     <LivekitRoomComponent 
       livekitRoomOptions={{                                                                             
@@ -133,15 +149,11 @@ function room(token, serverUrl, name, preJoinChoices, returnUrl, e2eeOptions) {
         audio: preJoinChoices?.audioEnabled,
         video: preJoinChoices?.videoEnabled,
         onError: (error) => {
-          alertify.error("Error connecting to room: " + error.message)
+          if (error.message === "Client initiated disconnect") return
+          console.error(error)
+          alertify.error(error.message)
         },
-        onDisconnected: () => {
-          if (returnUrl) {
-            window.location.href = returnUrl
-          } else {
-            preJoin(token, serverUrl, name, returnUrl, e2eeOptions)
-          }
-        }
+        onDisconnected: () => {},
       }}
       e2eeOptions={e2eeOptions}
     />
