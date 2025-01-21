@@ -1,6 +1,6 @@
 import React from 'react'
 import { createRoot } from 'react-dom/client'
-import { LiveKitRoom, VideoConference, PreJoin, StartAudio } from '@livekit/components-react'
+import { LiveKitRoom, VideoConference, PreJoin } from '@livekit/components-react'
 import { Room, ExternalE2EEKeyProvider } from 'livekit-client'
 import '@livekit/components-styles'
 import 'alertifyjs/build/css/alertify.css'
@@ -54,7 +54,6 @@ const LivekitRoomComponent = ({livekitRoomOptions = {}, e2eeOptions}) => (
     {...livekitRoomOptions}
   >
     <VideoConference />
-    <StartAudio />
   </LiveKitRoom>
 )
 
@@ -78,6 +77,16 @@ const getRoot = (elementId) => {
   return createRoot(container)
 }
 
+function leave(returnUrl) {
+  if (window.livekituiLeaving) return
+  window.livekituiLeaving = true
+  if (returnUrl) {
+    window.location.href = returnUrl
+  } else {
+    window.location.href = window.location.href
+  }
+}
+
 // User-facing functions
 function preJoin(token, serverUrl, name, returnUrl, e2eeOptions) {
   try {
@@ -87,9 +96,7 @@ function preJoin(token, serverUrl, name, returnUrl, e2eeOptions) {
     return
   }
 
-  const prejoinElement = document.getElementById('prejoin')
-  if (prejoinElement) prejoinElement.classList.remove('hide')
-  
+  document.body.classList.add('livekitui-prejoin')
   const root = getRoot('livekitui-ui')
   if (!root) return
   
@@ -106,7 +113,8 @@ function preJoin(token, serverUrl, name, returnUrl, e2eeOptions) {
         token,
         serverUrl,
         name,
-        onSubmit: (preJoinChoices) => { 
+        onSubmit: (preJoinChoices) => {
+          document.body.classList.remove('livekitui-prejoin')
           room(token, serverUrl, name, preJoinChoices, returnUrl, e2eeOptions)
         }
       }}
@@ -115,6 +123,8 @@ function preJoin(token, serverUrl, name, returnUrl, e2eeOptions) {
 }
 
 function room(token, serverUrl, name, preJoinChoices, returnUrl, e2eeOptions) {
+  window.returnUrl = returnUrl
+  
   try {
     validateE2EEOptions(e2eeOptions)
   } catch (error) {
@@ -122,21 +132,9 @@ function room(token, serverUrl, name, preJoinChoices, returnUrl, e2eeOptions) {
     return
   }
 
-  const prejoinElement = document.getElementById('prejoin')
-  if (prejoinElement) prejoinElement.classList.add('hide')
-  
+  document.body.classList.add('livekitui-room')
   const root = getRoot('livekitui-ui')
   if (!root) return
-  
-  document.addEventListener('click', e => {
-    if (e.target.matches('.lk-disconnect-button')) {
-      if (returnUrl) {
-        window.location.href = returnUrl
-      } else {
-        preJoin(token, serverUrl, name, returnUrl, e2eeOptions)
-      }
-    }
-  })
   
   root.render(
     <LivekitRoomComponent 
@@ -153,12 +151,23 @@ function room(token, serverUrl, name, preJoinChoices, returnUrl, e2eeOptions) {
           console.error(error)
           alertify.error(error.message)
         },
-        onDisconnected: () => {},
+        onDisconnected: () => {
+          leave(returnUrl)
+        },
       }}
       e2eeOptions={e2eeOptions}
     />
   )
 }
+
+document.addEventListener('click', e => {
+  if (e.target.matches('.lk-disconnect-button')) {
+    e.preventDefault()
+    e.stopPropagation()
+    e.stopImmediatePropagation()
+    leave(window.returnUrl)
+  }
+})
 
 // Expose functions to window.livekit
 window.livekit = { preJoin, room }
