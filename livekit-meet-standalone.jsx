@@ -1,10 +1,22 @@
 import React from 'react'
 import { createRoot } from 'react-dom/client'
 import { LiveKitRoom, VideoConference, PreJoin } from '@livekit/components-react'
-import { Room, ExternalE2EEKeyProvider } from 'livekit-client'
+import { Room, ExternalE2EEKeyProvider, RoomEvent } from 'livekit-client'
+
 import '@livekit/components-styles'
 import 'alertifyjs/build/css/alertify.css'
 import alertify from 'alertifyjs'
+
+function setUrlParam(name, value) {
+  const url = new URL(window.location.href)
+  url.searchParams.set(name, value)
+  window.history.replaceState({}, '', url)
+}
+
+function getUrlParam(name) {
+  const params = new URLSearchParams(window.location.search)
+  return params.get(name)
+}
 
 const validateE2EEOptions = (e2eeOptions) => {
   if (!e2eeOptions) {
@@ -23,49 +35,41 @@ const validateE2EEOptions = (e2eeOptions) => {
 
 const getRoom = (options = {}, e2eeOptions) => {
   validateE2EEOptions(e2eeOptions)
-
+  var livekitRoom
   if (e2eeOptions.disabled !== true) {
     const keyProvider = new ExternalE2EEKeyProvider()
     keyProvider.setKey(e2eeOptions.key)
 
-    const room = new Room({
+    livekitRoom = new Room({
       ...options,
       e2ee: {
         keyProvider,
         worker: new Worker(e2eeOptions.workerUrl)
       }
     })
-
-    room.setE2EEEnabled(true)
-    return room
+    livekitRoom.setE2EEEnabled(true)
   } else {
-    return new Room(options)
+    livekitRoom = new Room(options)
   }
+
+  livekitRoom.on(RoomEvent.TrackMuted, (track) => {
+    if (track.kind === 'audio') {
+      setUrlParam('audio', 'off');
+    } else if (track.kind === 'video') {
+      setUrlParam('video', 'off');
+    }
+  });
+
+  livekitRoom.on(RoomEvent.TrackUnmuted, (track) => {
+    if (track.kind === 'audio') {
+      setUrlParam('audio', 'on');
+    } else if (track.kind === 'video') {
+      setUrlParam('video', 'on');
+    }
+  });
+  
+  return livekitRoom
 }
-
-const LivekitRoomComponent = ({livekitRoomOptions = {}, e2eeOptions}) => (
-  <LiveKitRoom 
-    room={getRoom(livekitRoomOptions, e2eeOptions)}
-    connectOptions={{ autoSubscribe: true }}
-    onError={(error) => {
-      console.error('Room error:', error)
-      alertify.error(`Room error: ${error.message}`)
-    }}
-    {...livekitRoomOptions}
-  >
-    <VideoConference />
-  </LiveKitRoom>
-)
-
-const PreJoinComponent = ({preJoinOptions = {}}) => (
-  <PreJoin 
-    onError={(error) => {
-      console.error('PreJoin error:', error)
-      alertify.error(`Failed to join: ${error.message}`)
-    }}
-    {...preJoinOptions} 
-  /> 
-)
 
 const getRoot = (elementId) => {
   const container = document.getElementById(elementId)
@@ -101,28 +105,33 @@ function preJoin(token, serverUrl, name, returnUrl, e2eeOptions) {
   if (!root) return
   
   root.render(
-    <PreJoinComponent
-      preJoinOptions={{
-        'data-lk-theme': 'default',
-        video: true,
-        audio: true,
-        persistUserChoices: true,
-        defaults: {
-          username: "set-by-token-is-here-for-validation-hidden-via-css"
-        },
-        token,
-        serverUrl,
-        name,
-        onSubmit: (preJoinChoices) => {
-          document.body.classList.remove('livekitui-prejoin')
-          room(token, serverUrl, name, preJoinChoices, returnUrl, e2eeOptions)
-        }
+    <PreJoin 
+      data-lk-theme="default"
+      video={true}
+      audio={true}
+      persistUserChoices={true}
+      defaults={{
+        username: "set-by-token-is-here-for-validation-hidden-via-css"
+      }}
+      token={token}
+      serverUrl={serverUrl}
+      name={name}
+      onError={(error) => {
+        console.error('PreJoin error:', error)
+        alertify.error(`Failed to join: ${error.message}`)
+      }}
+      onSubmit={(preJoinChoices) => {
+        document.body.classList.remove('livekitui-prejoin')
+        room(token, serverUrl, name, preJoinChoices.audioEnabled, preJoinChoices.videoEnabled, returnUrl, e2eeOptions)
       }}
     />
   )
 }
 
-function room(token, serverUrl, name, preJoinChoices, returnUrl, e2eeOptions) {
+function room(token, serverUrl, name, audioEnabled, videoEnabled, returnUrl, e2eeOptions) {
+  setUrlParam("joined", "ok")
+  setUrlParam("audio", audioEnabled ? "on" : "off")
+  setUrlParam("video", videoEnabled ? "on" : "off")
   window.returnUrl = returnUrl
   
   try {
@@ -137,27 +146,39 @@ function room(token, serverUrl, name, preJoinChoices, returnUrl, e2eeOptions) {
   if (!root) return
   
   root.render(
-    <LivekitRoomComponent 
-      livekitRoomOptions={{                                                                             
-        'data-lk-theme': 'default',
-        token,
-        serverUrl,
-        name,
-        connect: true,
-        audio: preJoinChoices?.audioEnabled,
-        video: preJoinChoices?.videoEnabled,
-        onError: (error) => {
-          if (error.message === "Client initiated disconnect") return
-          console.error(error)
-          alertify.error(error.message)
-        },
-        onDisconnected: () => {
-          leave(returnUrl)
-        },
+    <LiveKitRoom 
+      room={getRoom({ token, serverUrl, name }, e2eeOptions)}
+      data-lk-theme="default"
+      token={token}
+      serverUrl={serverUrl}
+      name={name}
+      connect={true}
+      audio={audioEnabled}
+      video={videoEnabled}
+      connectOptions={{ autoSubscribe: true }}
+      onError={(error) => {
+        if (error.message === "Client initiated disconnect") return
+        console.error(error)
+        alertify.error(error.message)
       }}
-      e2eeOptions={e2eeOptions}
-    />
+      onDisconnected={() => {
+        leave(returnUrl)
+      }}
+    >
+      <VideoConference />
+    </LiveKitRoom>
   )
+}
+
+function init(token, serverUrl, name, returnUrl, e2eeOptions) {
+  const joined = getUrlParam("joined") === "ok"
+  if (joined) {
+    const audioEnabled = getUrlParam("audio") === "on"
+    const videoEnabled = getUrlParam("video") === "on"
+    room(token, serverUrl, name, audioEnabled, videoEnabled, returnUrl, e2eeOptions)
+  } else {
+    preJoin(token, serverUrl, name, returnUrl, e2eeOptions)
+  }
 }
 
 document.addEventListener('click', e => {
@@ -170,4 +191,4 @@ document.addEventListener('click', e => {
 })
 
 // Expose functions to window.livekit
-window.livekit = { preJoin, room }
+window.livekit = { preJoin, room, init }
