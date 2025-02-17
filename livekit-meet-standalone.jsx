@@ -161,9 +161,6 @@ function room(token, serverUrl, name, audioEnabled, videoEnabled, returnUrl, e2e
         console.error(error)
         alertify.error(error.message)
       }}
-      onDisconnected={() => {
-        leave(returnUrl)
-      }}
     >
       <VideoConference />
     </LiveKitRoom>
@@ -188,7 +185,7 @@ document.addEventListener('click', e => {
     e.stopImmediatePropagation()
     leave(window.returnUrl)
   }
-})
+}, {capture: true})
 
 // Expose functions to window.livekit
 window.livekit = { preJoin, room, init }
